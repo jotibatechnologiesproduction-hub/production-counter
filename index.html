@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Production Counter Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #1e293b;
+      color: #fff;
+      padding: 16px 24px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+    .container {
+      padding: 24px;
+      max-width: 900px;
+      margin: auto;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .counter {
+      font-size: 64px;
+      font-weight: bold;
+      text-align: center;
+      color: #0f766e;
+    }
+    .label {
+      text-align: center;
+      font-size: 18px;
+      color: #555;
+    }
+    .status {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+      font-size: 14px;
+      color: #333;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      padding: 12px;
+    }
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Production Counter – Live Dashboard</h1>
+  </header>
+
+  <div class="container">
+
+    <div class="card">
+      <div class="counter" id="count">0</div>
+      <div class="label">Total Parts Produced</div>
+    </div>
+
+    <div class="card">
+      <h3>Machine Status</h3>
+      <div class="status">
+        <div>ESP32 Status: <strong id="espStatus">Disconnected</strong></div>
+        <div>Last Update: <strong id="lastUpdate">--</strong></div>
+      </div>
+      <br />
+      <button onclick="simulateUpdate()">Simulate Count (Demo)</button>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    © 2026 Jotiba Technologies Pvt. Ltd. | Production Monitoring System
+  </div>
+
+  <script>
+    // Demo only – this will be replaced by ESP32 data
+    let demoCount = 0;
+
+    function simulateUpdate() {
+      demoCount++;
+      document.getElementById('count').innerText = demoCount;
+      document.getElementById('espStatus').innerText = 'Connected';
+      document.getElementById('lastUpdate').innerText = new Date().toLocaleString();
+    }
+
+    // Future use:
+    // Fetch data from server or ESP32 API
+    // fetch('https://yourserver.com/api/count')
+    //   .then(res => res.json())
+    //   .then(data => {
+    //     document.getElementById('count').innerText = data.count;
+    //   });
+  </script>
+
+</body>
+</html>
