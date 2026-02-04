@@ -3,121 +3,112 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Production Counter Dashboard</title>
+  <title>Automatic Production Counter Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: Arial, sans-serif;
       background: #f4f6f8;
       margin: 0;
-      padding: 0;
+      padding: 20px;
     }
-    header {
-      background: #1e293b;
-      color: #fff;
-      padding: 16px 24px;
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
     }
-    header h1 {
-      margin: 0;
-      font-size: 22px;
-    }
-    .container {
-      padding: 24px;
-      max-width: 900px;
-      margin: auto;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
     }
     .card {
       background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-      padding: 24px;
-      margin-bottom: 24px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
     }
-    .counter {
-      font-size: 64px;
+    .header {
+      background: #76b041;
+      color: #000;
+      text-align: center;
       font-weight: bold;
-      text-align: center;
-      color: #0f766e;
+      padding: 6px;
+      border-radius: 4px;
     }
-    .label {
-      text-align: center;
-      font-size: 18px;
-      color: #555;
-    }
-    .status {
+    .content {
       display: flex;
       justify-content: space-between;
-      margin-top: 16px;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .stats {
       font-size: 14px;
-      color: #333;
+      line-height: 1.8;
     }
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: #666;
-      padding: 12px;
+    .stats span {
+      font-weight: bold;
     }
-    button {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 6px;
-      background: #2563eb;
-      color: #fff;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    button:hover {
-      background: #1d4ed8;
+    canvas {
+      width: 120px !important;
+      height: 120px !important;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Production Counter – Live Dashboard</h1>
-  </header>
+<h1>Automatic Production Counter – Live Dashboard</h1>
 
-  <div class="container">
+<div class="grid" id="dashboard"></div>
 
-    <div class="card">
-      <div class="counter" id="count">0</div>
-      <div class="label">Total Parts Produced</div>
-    </div>
+<script>
+  const machines = [
+    { name: 'CNC 01', target: 2000, actual: 1250, downtime: 25 },
+    { name: 'CNC 02', target: 2000, actual: 1680, downtime: 12 },
+    { name: 'CNC 03', target: 2000, actual: 980, downtime: 40 },
+    { name: 'CNC 04', target: 2000, actual: 2000, downtime: 5 },
+    { name: 'CNC 05', target: 2000, actual: 1540, downtime: 18 },
+    { name: 'CG 01',  target: 4000, actual: 3100, downtime: 22 },
+    { name: 'CG 02',  target: 4000, actual: 3600, downtime: 10 },
+    { name: 'CG 03',  target: 4000, actual: 2800, downtime: 35 },
+    { name: 'CG 04',  target: 4000, actual: 3900, downtime: 6 }
+  ];
 
-    <div class="card">
-      <h3>Machine Status</h3>
-      <div class="status">
-        <div>ESP32 Status: <strong id="espStatus">Disconnected</strong></div>
-        <div>Last Update: <strong id="lastUpdate">--</strong></div>
+  const dashboard = document.getElementById('dashboard');
+
+  machines.forEach((m, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    card.innerHTML = `
+      <div class="header">${m.name}</div>
+      <div class="content">
+        <div class="stats">
+          Targeted – <span>${m.target}</span><br>
+          Actual – <span>${m.actual}</span><br>
+          M/C Downtime – <span>${m.downtime} min</span>
+        </div>
+        <canvas id="chart${i}"></canvas>
       </div>
-      <br />
-      <button onclick="simulateUpdate()">Simulate Count (Demo)</button>
-    </div>
+    `;
 
-  </div>
+    dashboard.appendChild(card);
 
-  <div class="footer">
-    © 2026 Jotiba Technologies Pvt. Ltd. | Production Monitoring System
-  </div>
-
-  <script>
-    // Demo only – this will be replaced by ESP32 data
-    let demoCount = 0;
-
-    function simulateUpdate() {
-      demoCount++;
-      document.getElementById('count').innerText = demoCount;
-      document.getElementById('espStatus').innerText = 'Connected';
-      document.getElementById('lastUpdate').innerText = new Date().toLocaleString();
-    }
-
-    // Future use:
-    // Fetch data from server or ESP32 API
-    // fetch('https://yourserver.com/api/count')
-    //   .then(res => res.json())
-    //   .then(data => {
-    //     document.getElementById('count').innerText = data.count;
-    //   });
-  </script>
+    const ctx = document.getElementById(`chart${i}`).getContext('2d');
+    new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Achieved', 'Balance'],
+        datasets: [{
+          data: [m.actual, Math.max(m.target - m.actual, 0)],
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        responsive: false
+      }
+    });
+  });
+</script>
 
 </body>
 </html>
