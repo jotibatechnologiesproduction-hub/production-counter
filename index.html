@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Automatic Production Counter Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Manual Production Entry – Temporary Mode</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -16,98 +15,105 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
-    .card {
+    table {
+      width: 100%;
+      border-collapse: collapse;
       background: #fff;
+    }
+    th, td {
       border: 1px solid #ccc;
-      border-radius: 6px;
       padding: 10px;
-    }
-    .header {
-      background: #76b041;
-      color: #000;
       text-align: center;
-      font-weight: bold;
-      padding: 6px;
-      border-radius: 4px;
     }
-    .content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 10px;
+    th {
+      background: #76b041;
     }
-    .stats {
-      font-size: 14px;
-      line-height: 1.8;
+    input {
+      width: 80px;
+      padding: 5px;
+      text-align: center;
     }
-    .stats span {
-      font-weight: bold;
+    button {
+      padding: 6px 12px;
+      cursor: pointer;
     }
-    canvas {
-      width: 120px !important;
-      height: 120px !important;
+    .summary {
+      margin-top: 20px;
+      background: #fff;
+      padding: 15px;
+      border: 1px solid #ccc;
     }
   </style>
 </head>
 <body>
 
-<h1>Automatic Production Counter – Live Dashboard</h1>
+<h1>Automatic Production Counter – Manual Entry (Temporary)</h1>
 
-<div class="grid" id="dashboard"></div>
+<table>
+  <tr>
+    <th>Machine</th>
+    <th>Target</th>
+    <th>Actual (Manual)</th>
+    <th>Balance</th>
+    <th>Update</th>
+  </tr>
+
+  <tr>
+    <td>CNC 01</td>
+    <td>2000</td>
+    <td><input id="cnc1" type="number" value="0"></td>
+    <td id="bal1">2000</td>
+    <td><button onclick="update(1,2000)">Save</button></td>
+  </tr>
+
+  <tr>
+    <td>CNC 02</td>
+    <td>2000</td>
+    <td><input id="cnc2" type="number" value="0"></td>
+    <td id="bal2">2000</td>
+    <td><button onclick="update(2,2000)">Save</button></td>
+  </tr>
+
+  <tr>
+    <td>CNC 03</td>
+    <td>2000</td>
+    <td><input id="cnc3" type="number" value="0"></td>
+    <td id="bal3">2000</td>
+    <td><button onclick="update(3,2000)">Save</button></td>
+  </tr>
+
+  <tr>
+    <td>CNC 04</td>
+    <td>2000</td>
+    <td><input id="cnc4" type="number" value="0"></td>
+    <td id="bal4">2000</td>
+    <td><button onclick="update(4,2000)">Save</button></td>
+  </tr>
+
+  <tr>
+    <td>CG 01</td>
+    <td>4000</td>
+    <td><input id="cg1" type="number" value="0"></td>
+    <td id="bal5">4000</td>
+    <td><button onclick="updateCG(1,4000)">Save</button></td>
+  </tr>
+</table>
+
+<div class="summary">
+  <b>Note:</b> This is <b>temporary manual entry mode</b>. Data is stored only in browser memory.
+  ESP32 automatic counting will replace this later.
+</div>
 
 <script>
-  const machines = [
-    { name: 'CNC 01', target: 2000, actual: 1250, downtime: 25 },
-    { name: 'CNC 02', target: 2000, actual: 1680, downtime: 12 },
-    { name: 'CNC 03', target: 2000, actual: 980, downtime: 40 },
-    { name: 'CNC 04', target: 2000, actual: 2000, downtime: 5 },
-    { name: 'CNC 05', target: 2000, actual: 1540, downtime: 18 },
-    { name: 'CG 01',  target: 4000, actual: 3100, downtime: 22 },
-    { name: 'CG 02',  target: 4000, actual: 3600, downtime: 10 },
-    { name: 'CG 03',  target: 4000, actual: 2800, downtime: 35 },
-    { name: 'CG 04',  target: 4000, actual: 3900, downtime: 6 }
-  ];
+  function update(id, target) {
+    const val = document.getElementById('cnc' + id).value || 0;
+    document.getElementById('bal' + id).innerText = target - val;
+  }
 
-  const dashboard = document.getElementById('dashboard');
-
-  machines.forEach((m, i) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-
-    card.innerHTML = `
-      <div class="header">${m.name}</div>
-      <div class="content">
-        <div class="stats">
-          Targeted – <span>${m.target}</span><br>
-          Actual – <span>${m.actual}</span><br>
-          M/C Downtime – <span>${m.downtime} min</span>
-        </div>
-        <canvas id="chart${i}"></canvas>
-      </div>
-    `;
-
-    dashboard.appendChild(card);
-
-    const ctx = document.getElementById(`chart${i}`).getContext('2d');
-    new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: ['Achieved', 'Balance'],
-        datasets: [{
-          data: [m.actual, Math.max(m.target - m.actual, 0)],
-        }]
-      },
-      options: {
-        plugins: { legend: { display: false } },
-        responsive: false
-      }
-    });
-  });
+  function updateCG(id, target) {
+    const val = document.getElementById('cg' + id).value || 0;
+    document.getElementById('bal5').innerText = target - val;
+  }
 </script>
 
 </body>
