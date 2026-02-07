@@ -1,59 +1,117 @@
-<!-- UPDATED DASHBOARD WITH TIME-BASED PIE CHART & MANUAL HOURLY ENTRY -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Production Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <title>Automatic Production Counter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; background:#f4f4f4; }
-    .grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:15px; }
-    .card { background:#fff; border:1px solid #ccc; padding:10px; }
-    .title { background:#6cab43; color:#fff; padding:5px; text-align:center; font-weight:bold; }
-    .row { display:flex; justify-content:space-between; margin:4px 0; }
-    input { width:70px; }
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f4f6f8}
+    header{background:#0b5ed7;color:#fff;padding:14px 20px}
+    nav{display:flex;gap:20px}
+    nav a{color:#fff;text-decoration:none;font-weight:bold;cursor:pointer}
+    .container{padding:20px}
+    .hidden{display:none}
+    .card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.1);margin-bottom:20px}
+    input,button{padding:10px;font-size:16px}
+    button{background:#0b5ed7;color:#fff;border:none;border-radius:4px;cursor:pointer}
+    button:hover{background:#094ab2}
+    .gallery img{max-width:100%;height:300px;object-fit:contain}
   </style>
 </head>
 <body>
-<h2>Automatic Production Counter – Manual Hourly Mode</h2>
-<div class="grid" id="dashboard"></div>
+
+<header>
+  <h2>Automatic Production Counter</h2>
+  <nav>
+    <a onclick="showPage('home')">Home</a>
+    <a onclick="showPage('about')">About Us</a>
+    <a onclick="showPage('login')">Admin Login</a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <!-- HOME DASHBOARD -->
+  <div id="home" class="card">
+    <h3>Main Dashboard</h3>
+    <p>Welcome to the Automatic Production Monitoring System.</p>
+    <p>This dashboard shows real-time and shift-based production performance.</p>
+  </div>
+
+  <!-- ABOUT US -->
+  <div id="about" class="card hidden">
+    <h3>About Us</h3>
+    <p>We specialize in industrial automation solutions including CNC production monitoring,
+    poka-yoke systems, and IoT-based manufacturing dashboards.</p>
+    <p>Company: Jotiba Technologies Pvt. Ltd.</p>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="login" class="card hidden">
+    <h3>Admin Login</h3>
+    <input type="password" id="password" placeholder="Enter Password" />
+    <br><br>
+    <button onclick="login()">Login</button>
+    <p id="loginMsg" style="color:red"></p>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="admin" class="hidden">
+    <div class="card">
+      <h3>Admin Panel</h3>
+      <button onclick="showPage('production')">Production Dashboard</button>
+      <button onclick="showPage('slides')">Yesterday Production Slides</button>
+    </div>
+
+    <!-- PRODUCTION DASHBOARD -->
+    <div id="production" class="card hidden">
+      <h3>Production Dashboard (Admin)</h3>
+      <p>This page will show live / manual production data.</p>
+    </div>
+
+    <!-- SLIDES -->
+    <div id="slides" class="card hidden">
+      <h3>Yesterday Production & Images</h3>
+      <p>Upload PPT screenshots or images (place files in same folder).</p>
+      <div class="gallery">
+        <img id="slideImg" src="slide1.jpg" alt="Slide" />
+      </div>
+      <br>
+      <button onclick="prevImg()">Previous</button>
+      <button onclick="nextImg()">Next</button>
+    </div>
+  </div>
+
+</div>
 
 <script>
-const machines = [
- {name:'CNC 01', pph:200}, {name:'CNC 02', pph:200}, {name:'CNC 03', pph:250},
- {name:'CNC 04', pph:200}, {name:'CNC 05', pph:200},
- {name:'CG 01', pph:360}, {name:'CG 02', pph:360}, {name:'CG 03', pph:360}, {name:'CG 04', pph:360}
-];
+  const pages = ['home','about','login','admin','production','slides'];
+  function showPage(id){
+    pages.forEach(p=>{
+      const el=document.getElementById(p);
+      if(el) el.classList.add('hidden');
+    });
+    document.getElementById(id).classList.remove('hidden');
+  }
 
-const hours = new Date().getHours(); // current hour
+  function login(){
+    const pwd=document.getElementById('password').value;
+    if(pwd==='123456789'){
+      showPage('admin');
+      document.getElementById('loginMsg').innerText='';
+    } else {
+      document.getElementById('loginMsg').innerText='Wrong password';
+    }
+  }
 
-machines.forEach((m, i) => {
-  const target = m.pph * hours;
-  const id = 'm'+i;
-  document.getElementById('dashboard').innerHTML += `
-  <div class="card">
-    <div class="title">${m.name}</div>
-    <div class="row">Targeted: <span id="t${id}">${target}</span></div>
-    <div class="row">Actual: <input type="number" id="a${id}" value="0" onchange="update(${i})"></div>
-    <canvas id="c${id}" height="120"></canvas>
-  </div>`;
-});
-
-const charts = [];
-function update(i){
-  const h = hours;
-  const m = machines[i];
-  const target = m.pph * h;
-  const actual = +document.getElementById('a'+ 'm'+i).value;
-  const bal = Math.max(target-actual,0);
-
-  if(charts[i]) charts[i].destroy();
-  charts[i] = new Chart(document.getElementById('c'+'m'+i),{
-    type:'pie',
-    data:{ labels:['Produced','Remaining'], datasets:[{ data:[actual, bal], backgroundColor:['#4caf50','#ff9800'] }]},
-    options:{ plugins:{ legend:{display:false} } }
-  });
-}
+  const images=['slide1.jpg','slide2.jpg','slide3.jpg'];
+  let index=0;
+  function showImg(){
+    document.getElementById('slideImg').src=images[index];
+  }
+  function nextImg(){index=(index+1)%images.length;showImg();}
+  function prevImg(){index=(index-1+images.length)%images.length;showImg();}
 </script>
+
 </body>
 </html>
