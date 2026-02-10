@@ -1,42 +1,43 @@
-<script>
-let port;
-let reader;
-
-async function connectSerial() {
-  try {
-    port = await navigator.serial.requestPort();
-    await port.open({ baudRate: 115200 });
-
-    document.getElementById("status").innerText = "Connected";
-
-    reader = port.readable.getReader();
-    readSerial();
-  } catch (err) {
-    alert("Serial connection failed");
-  }
-}
-
-async function readSerial() {
-  let buffer = "";
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-
-    buffer += new TextDecoder().decode(value);
-    let lines = buffer.split("\n");
-
-    buffer = lines.pop();
-
-    for (let line of lines) {
-      processData(line.trim());
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Production Dashboard</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f2f2f2;
+      margin: 0;
     }
-  }
-}
-
-function processData(data) {
-  if (data.startsWith("CNC1=")) {
-    let count = data.split("=")[1];
-    document.getElementById("cnc1Actual").innerText = count;
-  }
-}
-</script>
+    header {
+      background: #0b3c6f;
+      color: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    button {
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+    .hidden {
+      display: none;
+    }
+    .box {
+      background: white;
+      width: 280px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      padding: 20px;
+    }
+    .title {
+      background: #7cb342;
+      color: white;
+      padding: 6px;
+      text-al
