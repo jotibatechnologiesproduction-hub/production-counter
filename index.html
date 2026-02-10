@@ -1,253 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Production Dashboard</title>
-
-<style>
-body{
-  margin:0;
-  font-family: Arial, sans-serif;
-  background:#f2f2f2;
-}
-
-/* PASSWORD SCREEN */
-#loginScreen{
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:#0b2c6f;
-}
-#loginBox{
-  background:white;
-  padding:30px;
-  border-radius:8px;
-  text-align:center;
-}
-input{
-  padding:10px;
-  width:200px;
-  margin-top:10px;
-}
-button{
-  padding:10px 20px;
-  margin-top:15px;
-  background:#4CAF50;
-  border:none;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-/* DASHBOARD */
-#dashboard{
-  display:none;
-  padding:20px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap:20px;
-}
-
-.card{
-  background:white;
-  border:1px solid #000;
-  padding:10px;
-}
-
-.title{
-  background:#77b34d;
-  color:black;
-  font-weight:bold;
-  text-align:center;
-  padding:5px;
-  border-radius:5px;
-}
-
-.details{
-  display:flex;
-  justify-content:space-between;
-  margin-top:10px;
-}
-
-.left p{
-  margin:6px 0;
-}
-
-.pie{
-  width:100px;
-  height:100px;
-  border-radius:50%;
-  background: conic-gradient(
-    #1f77b4 0% 70%,
-    #ff7f0e 70% 100%
-  );
-}
-
-.footer{
-  text-align:center;
-  margin-top:20px;
-  font-weight:bold;
-}
-</style>
-</head>
-
-<body>
-
-<!-- LOGIN -->
-<div id="loginScreen">
-  <div id="loginBox">
-    <h3>Enter Password</h3>
-    <input type="password" id="password" placeholder="Password">
-    <br>
-    <button onclick="checkPassword()">Login</button>
-  </div>
-</div>
-
-<!-- DASHBOARD -->
-<div id="dashboard">
-  <h2>Production Dashboard</h2>
-
-  <div class="grid">
-
-    <!-- CNC 01 -->
-    <div class="card">
-      <div class="title">CNC 01</div>
-      <div class="details">
-        <div class="left">
-          <p>Targeted – 0000</p>
-          <p>Actual – 0000</p>
-          <p>M/C Downtime – 00</p>
-        </div>
-        <div class="pie"></div>
-      </div>
-    </div>
-
-    <!-- CNC 02 -->
-    <div class="card">
-      <div class="title">CNC 02</div>
-      <div class="details">
-        <div class="left">
-          <p>Targeted – 0000</p>
-          <p>Actual – 0000</p>
-          <p>M/C Downtime – 00</p>
-        </div>
-        <div class="pie"></div>
-      </div>
-    </div>
-
-    <!-- CNC 03 -->
-    <div class="card">
-      <div class="title">CNC 03</div>
-      <div class="details">
-        <div class="left">
-          <p>Targeted – 0000</p>
-          <p>Actual – 0000</p>
-          <p>M/C Downtime – 00</p>
-        </div>
-        <div class="pie"></div>
-      </div>
-    </div>
-
-    <!-- CNC 04 -->
-    <div class="card">
-      <div class="title">CNC 04</div>
-      <div class="details">
-        <div class="left">
-          <p>Targeted – 0000</p>
-          <p>Actual – 0000</p>
-          <p>M/C Downtime – 00</p>
-        </div>
-        <div class="pie"></div>
-      </div>
-    </div>
-
-    <!-- CNC 05 -->
-    <div class="card">
-      <div class="title">CNC 05</div>
-      <div class="details">
-        <div class="left">
-          <p>Targeted – 0000</p>
-          <p>Actual – 0000</p>
-          <p>M/C Downtime – 00</p>
-        </div>
-        <div class="pie"></div>
-      </div>
-    </div>
-
-    <!-- CG 01 -->
-    <div class="card">
-      <div class="title">CG 01</div>
-      <div class="details">
-        <div class="left">
-          <p>Targeted – 0000</p>
-          <p>Actual – 0000</p>
-          <p>M/C Downtime – 00</p>
-        </div>
-        <div class="pie"></div>
-      </div>
-    </div>
-
-    <!-- CG 02 -->
-    <div class="card">
-      <div class="title">CG 02</div>
-      <div class="details">
-        <div class="left">
-          <p>Targeted – 0000</p>
-          <p>Actual – 0000</p>
-          <p>M/C Downtime – 00</p>
-        </div>
-        <div class="pie"></div>
-      </div>
-    </div>
-
-    <!-- CG 03 -->
-    <div class="card">
-      <div class="title">CG 03</div>
-      <div class="details">
-        <div class="left">
-          <p>Targeted – 0000</p>
-          <p>Actual – 0000</p>
-          <p>M/C Downtime – 00</p>
-        </div>
-        <div class="pie"></div>
-      </div>
-    </div>
-
-    <!-- CG 04 -->
-    <div class="card">
-      <div class="title">CG 04</div>
-      <div class="details">
-        <div class="left">
-          <p>Targeted – 0000</p>
-          <p>Actual – 0000</p>
-          <p>M/C Downtime – 00</p>
-        </div>
-        <div class="pie"></div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="footer">
-    Jotiba Technologies – Production Monitoring
-  </div>
-</div>
-
 <script>
-function checkPassword(){
-  let pass = document.getElementById("password").value;
-  if(pass === "123"){
-    document.getElementById("loginScreen").style.display="none";
-    document.getElementById("dashboard").style.display="block";
-  }else{
-    alert("Wrong Password");
+let port;
+let reader;
+
+async function connectSerial() {
+  try {
+    port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 115200 });
+
+    document.getElementById("status").innerText = "Connected";
+
+    reader = port.readable.getReader();
+    readSerial();
+  } catch (err) {
+    alert("Serial connection failed");
+  }
+}
+
+async function readSerial() {
+  let buffer = "";
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+
+    buffer += new TextDecoder().decode(value);
+    let lines = buffer.split("\n");
+
+    buffer = lines.pop();
+
+    for (let line of lines) {
+      processData(line.trim());
+    }
+  }
+}
+
+function processData(data) {
+  if (data.startsWith("CNC1=")) {
+    let count = data.split("=")[1];
+    document.getElementById("cnc1Actual").innerText = count;
   }
 }
 </script>
-
-</body>
-</html>
