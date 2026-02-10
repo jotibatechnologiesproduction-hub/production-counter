@@ -2,115 +2,104 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Automatic Production Counter</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jotiba Technologies</title>
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f4f6f8}
-    header{background:#0b5ed7;color:#fff;padding:14px 20px}
-    nav{display:flex;gap:20px}
-    nav a{color:#fff;text-decoration:none;font-weight:bold;cursor:pointer}
-    .container{padding:20px}
-    .hidden{display:none}
-    .card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.1);margin-bottom:20px}
-    input,button{padding:10px;font-size:16px}
-    button{background:#0b5ed7;color:#fff;border:none;border-radius:4px;cursor:pointer}
-    button:hover{background:#094ab2}
-    .gallery img{max-width:100%;height:300px;object-fit:contain}
+    body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
+    header { background: #0b2c63; color: #fff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 22px; }
+    header button { background: #ff9800; border: none; padding: 8px 16px; color: #fff; cursor: pointer; border-radius: 4px; }
+    .hero { background: url('factory.jpg') center/cover no-repeat; height: 300px; }
+    .container { padding: 30px; }
+    h2 { color: #0b2c63; }
+    footer { background: #0b2c63; color: #fff; text-align: center; padding: 15px; }
+    /* Login modal */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+    .modal-content { background: #fff; padding: 25px; border-radius: 6px; width: 300px; text-align: center; }
+    .modal-content input { width: 100%; padding: 8px; margin: 10px 0; }
+    /* Dashboard */
+    #dashboard { display: none; padding: 30px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 20px; }
+    .card { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
 
 <header>
-  <h2>Automatic Production Counter</h2>
-  <nav>
-    <a onclick="showPage('home')">Home</a>
-    <a onclick="showPage('about')">About Us</a>
-    <a onclick="showPage('login')">Admin Login</a>
-  </nav>
+  <h1>Jotiba Technologies</h1>
+  <button onclick="openLogin()">Login</button>
 </header>
 
-<div class="container">
-
-  <!-- HOME DASHBOARD -->
-  <div id="home" class="card">
-    <h3>Main Dashboard</h3>
-    <p>Welcome to the Automatic Production Monitoring System.</p>
-    <p>This dashboard shows real-time and shift-based production performance.</p>
+<div id="home">
+  <div class="hero"></div>
+  <div class="container">
+    <h2>About Us</h2>
+    <p>
+      We are a manufacturing company specializing in seat pipes, a critical underbody component of automotive suspension systems.
+      Our focus is on producing high-quality, precision-engineered parts that meet stringent industry standards.
+    </p>
+    <p>
+      Our manufacturing operations are supported by precision machining processes that ensure high dimensional accuracy
+      and consistent quality using CNC machines.
+    </p>
   </div>
-
-  <!-- ABOUT US -->
-  <div id="about" class="card hidden">
-    <h3>About Us</h3>
-    <p>We specialize in industrial automation solutions including CNC production monitoring,
-    poka-yoke systems, and IoT-based manufacturing dashboards.</p>
-    <p>Company: Jotiba Technologies Pvt. Ltd.</p>
-  </div>
-
-  <!-- LOGIN -->
-  <div id="login" class="card hidden">
-    <h3>Admin Login</h3>
-    <input type="password" id="password" placeholder="Enter Password" />
-    <br><br>
-    <button onclick="login()">Login</button>
-    <p id="loginMsg" style="color:red"></p>
-  </div>
-
-  <!-- ADMIN PANEL -->
-  <div id="admin" class="hidden">
-    <div class="card">
-      <h3>Admin Panel</h3>
-      <button onclick="showPage('production')">Production Dashboard</button>
-      <button onclick="showPage('slides')">Yesterday Production Slides</button>
-    </div>
-
-    <!-- PRODUCTION DASHBOARD -->
-    <div id="production" class="card hidden">
-      <h3>Production Dashboard (Admin)</h3>
-      <p>This page will show live / manual production data.</p>
-    </div>
-
-    <!-- SLIDES -->
-    <div id="slides" class="card hidden">
-      <h3>Yesterday Production & Images</h3>
-      <p>Upload PPT screenshots or images (place files in same folder).</p>
-      <div class="gallery">
-        <img id="slideImg" src="slide1.jpg" alt="Slide" />
-      </div>
-      <br>
-      <button onclick="prevImg()">Previous</button>
-      <button onclick="nextImg()">Next</button>
-    </div>
-  </div>
-
 </div>
 
+<!-- Login Modal -->
+<div class="modal" id="loginModal">
+  <div class="modal-content">
+    <h3>Admin Login</h3>
+    <input type="password" id="password" placeholder="Enter Password" />
+    <button onclick="checkLogin()">Login</button>
+    <p id="error" style="color:red; display:none;">Wrong password</p>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard">
+  <h2>Production Dashboard</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>CNC Machine 1</h3>
+      <p>Today's Count: <strong>120</strong></p>
+    </div>
+    <div class="card">
+      <h3>CNC Machine 2</h3>
+      <p>Today's Count: <strong>98</strong></p>
+    </div>
+    <div class="card">
+      <h3>CNC Machine 3</h3>
+      <p>Today's Count: <strong>110</strong></p>
+    </div>
+    <div class="card">
+      <h3>CNC Machine 4</h3>
+      <p>Today's Count: <strong>105</strong></p>
+    </div>
+  </div>
+
+  <h2 style="margin-top:40px;">Yesterday's Production (Slides)</h2>
+  <p>Here you can later add sliding PPTs or images.</p>
+</div>
+
+<footer>
+  © 2026 Jotiba Technologies | Contact Us
+</footer>
+
 <script>
-  const pages = ['home','about','login','admin','production','slides'];
-  function showPage(id){
-    pages.forEach(p=>{
-      const el=document.getElementById(p);
-      if(el) el.classList.add('hidden');
-    });
-    document.getElementById(id).classList.remove('hidden');
+  function openLogin() {
+    document.getElementById('loginModal').style.display = 'flex';
   }
 
-  function login(){
-    const pwd=document.getElementById('password').value;
-    if(pwd==='123456789'){
-      showPage('admin');
-      document.getElementById('loginMsg').innerText='';
+  function checkLogin() {
+    const pwd = document.getElementById('password').value;
+    if (pwd === '123') {
+      document.getElementById('loginModal').style.display = 'none';
+      document.getElementById('home').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
     } else {
-      document.getElementById('loginMsg').innerText='Wrong password';
+      document.getElementById('error').style.display = 'block';
     }
   }
-
-  const images=['slide1.jpg','slide2.jpg','slide3.jpg'];
-  let index=0;
-  function showImg(){
-    document.getElementById('slideImg').src=images[index];
-  }
-  function nextImg(){index=(index+1)%images.length;showImg();}
-  function prevImg(){index=(index-1+images.length)%images.length;showImg();}
 </script>
 
 </body>
