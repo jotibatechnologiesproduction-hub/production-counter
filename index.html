@@ -1,105 +1,252 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jotiba Technologies</title>
-  <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
-    header { background: #0b2c63; color: #fff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { margin: 0; font-size: 22px; }
-    header button { background: #ff9800; border: none; padding: 8px 16px; color: #fff; cursor: pointer; border-radius: 4px; }
-    .hero { background: url('factory.jpg') center/cover no-repeat; height: 300px; }
-    .container { padding: 30px; }
-    h2 { color: #0b2c63; }
-    footer { background: #0b2c63; color: #fff; text-align: center; padding: 15px; }
-    /* Login modal */
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-    .modal-content { background: #fff; padding: 25px; border-radius: 6px; width: 300px; text-align: center; }
-    .modal-content input { width: 100%; padding: 8px; margin: 10px 0; }
-    /* Dashboard */
-    #dashboard { display: none; padding: 30px; }
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 20px; }
-    .card { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-  </style>
+<meta charset="UTF-8">
+<title>Production Dashboard</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#f2f2f2;
+}
+
+/* PASSWORD SCREEN */
+#loginScreen{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#0b2c6f;
+}
+#loginBox{
+  background:white;
+  padding:30px;
+  border-radius:8px;
+  text-align:center;
+}
+input{
+  padding:10px;
+  width:200px;
+  margin-top:10px;
+}
+button{
+  padding:10px 20px;
+  margin-top:15px;
+  background:#4CAF50;
+  border:none;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* DASHBOARD */
+#dashboard{
+  display:none;
+  padding:20px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:20px;
+}
+
+.card{
+  background:white;
+  border:1px solid #000;
+  padding:10px;
+}
+
+.title{
+  background:#77b34d;
+  color:black;
+  font-weight:bold;
+  text-align:center;
+  padding:5px;
+  border-radius:5px;
+}
+
+.details{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+}
+
+.left p{
+  margin:6px 0;
+}
+
+.pie{
+  width:100px;
+  height:100px;
+  border-radius:50%;
+  background: conic-gradient(
+    #1f77b4 0% 70%,
+    #ff7f0e 70% 100%
+  );
+}
+
+.footer{
+  text-align:center;
+  margin-top:20px;
+  font-weight:bold;
+}
+</style>
 </head>
+
 <body>
 
-<header>
-  <h1>Jotiba Technologies</h1>
-  <button onclick="openLogin()">Login</button>
-</header>
-
-<div id="home">
-  <div class="hero"></div>
-  <div class="container">
-    <h2>About Us</h2>
-    <p>
-      We are a manufacturing company specializing in seat pipes, a critical underbody component of automotive suspension systems.
-      Our focus is on producing high-quality, precision-engineered parts that meet stringent industry standards.
-    </p>
-    <p>
-      Our manufacturing operations are supported by precision machining processes that ensure high dimensional accuracy
-      and consistent quality using CNC machines.
-    </p>
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div id="loginBox">
+    <h3>Enter Password</h3>
+    <input type="password" id="password" placeholder="Password">
+    <br>
+    <button onclick="checkPassword()">Login</button>
   </div>
 </div>
 
-<!-- Login Modal -->
-<div class="modal" id="loginModal">
-  <div class="modal-content">
-    <h3>Admin Login</h3>
-    <input type="password" id="password" placeholder="Enter Password" />
-    <button onclick="checkLogin()">Login</button>
-    <p id="error" style="color:red; display:none;">Wrong password</p>
-  </div>
-</div>
-
-<!-- Dashboard -->
+<!-- DASHBOARD -->
 <div id="dashboard">
   <h2>Production Dashboard</h2>
-  <div class="cards">
+
+  <div class="grid">
+
+    <!-- CNC 01 -->
     <div class="card">
-      <h3>CNC Machine 1</h3>
-      <p>Today's Count: <strong>120</strong></p>
+      <div class="title">CNC 01</div>
+      <div class="details">
+        <div class="left">
+          <p>Targeted – 0000</p>
+          <p>Actual – 0000</p>
+          <p>M/C Downtime – 00</p>
+        </div>
+        <div class="pie"></div>
+      </div>
     </div>
+
+    <!-- CNC 02 -->
     <div class="card">
-      <h3>CNC Machine 2</h3>
-      <p>Today's Count: <strong>98</strong></p>
+      <div class="title">CNC 02</div>
+      <div class="details">
+        <div class="left">
+          <p>Targeted – 0000</p>
+          <p>Actual – 0000</p>
+          <p>M/C Downtime – 00</p>
+        </div>
+        <div class="pie"></div>
+      </div>
     </div>
+
+    <!-- CNC 03 -->
     <div class="card">
-      <h3>CNC Machine 3</h3>
-      <p>Today's Count: <strong>110</strong></p>
+      <div class="title">CNC 03</div>
+      <div class="details">
+        <div class="left">
+          <p>Targeted – 0000</p>
+          <p>Actual – 0000</p>
+          <p>M/C Downtime – 00</p>
+        </div>
+        <div class="pie"></div>
+      </div>
     </div>
+
+    <!-- CNC 04 -->
     <div class="card">
-      <h3>CNC Machine 4</h3>
-      <p>Today's Count: <strong>105</strong></p>
+      <div class="title">CNC 04</div>
+      <div class="details">
+        <div class="left">
+          <p>Targeted – 0000</p>
+          <p>Actual – 0000</p>
+          <p>M/C Downtime – 00</p>
+        </div>
+        <div class="pie"></div>
+      </div>
     </div>
+
+    <!-- CNC 05 -->
+    <div class="card">
+      <div class="title">CNC 05</div>
+      <div class="details">
+        <div class="left">
+          <p>Targeted – 0000</p>
+          <p>Actual – 0000</p>
+          <p>M/C Downtime – 00</p>
+        </div>
+        <div class="pie"></div>
+      </div>
+    </div>
+
+    <!-- CG 01 -->
+    <div class="card">
+      <div class="title">CG 01</div>
+      <div class="details">
+        <div class="left">
+          <p>Targeted – 0000</p>
+          <p>Actual – 0000</p>
+          <p>M/C Downtime – 00</p>
+        </div>
+        <div class="pie"></div>
+      </div>
+    </div>
+
+    <!-- CG 02 -->
+    <div class="card">
+      <div class="title">CG 02</div>
+      <div class="details">
+        <div class="left">
+          <p>Targeted – 0000</p>
+          <p>Actual – 0000</p>
+          <p>M/C Downtime – 00</p>
+        </div>
+        <div class="pie"></div>
+      </div>
+    </div>
+
+    <!-- CG 03 -->
+    <div class="card">
+      <div class="title">CG 03</div>
+      <div class="details">
+        <div class="left">
+          <p>Targeted – 0000</p>
+          <p>Actual – 0000</p>
+          <p>M/C Downtime – 00</p>
+        </div>
+        <div class="pie"></div>
+      </div>
+    </div>
+
+    <!-- CG 04 -->
+    <div class="card">
+      <div class="title">CG 04</div>
+      <div class="details">
+        <div class="left">
+          <p>Targeted – 0000</p>
+          <p>Actual – 0000</p>
+          <p>M/C Downtime – 00</p>
+        </div>
+        <div class="pie"></div>
+      </div>
+    </div>
+
   </div>
 
-  <h2 style="margin-top:40px;">Yesterday's Production (Slides)</h2>
-  <p>Here you can later add sliding PPTs or images.</p>
+  <div class="footer">
+    Jotiba Technologies – Production Monitoring
+  </div>
 </div>
 
-<footer>
-  © 2026 Jotiba Technologies | Contact Us
-</footer>
-
 <script>
-  function openLogin() {
-    document.getElementById('loginModal').style.display = 'flex';
+function checkPassword(){
+  let pass = document.getElementById("password").value;
+  if(pass === "123"){
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("dashboard").style.display="block";
+  }else{
+    alert("Wrong Password");
   }
-
-  function checkLogin() {
-    const pwd = document.getElementById('password').value;
-    if (pwd === '123') {
-      document.getElementById('loginModal').style.display = 'none';
-      document.getElementById('home').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-    } else {
-      document.getElementById('error').style.display = 'block';
-    }
-  }
+}
 </script>
 
 </body>
