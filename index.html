@@ -5,36 +5,96 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-    }
+    body { margin:0; font-family: Arial; background:#f4f6f8; }
     header {
-      background: #0b3c6f;
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      background:#0b3c6f; color:white; padding:15px;
+      display:flex; justify-content:space-between;
     }
     button {
-      padding: 8px 16px;
-      border: none;
-      background: #1976d2;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
+      padding:8px 14px; background:#1976d2;
+      color:white; border:none; border-radius:4px;
     }
-    .container {
-      padding: 20px;
-    }
-    .hidden {
-      display: none;
-    }
+    .hidden { display:none; }
     .card {
-      background: white;
-      border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      marg
+      background:white; padding:15px; border-radius:8px;
+      box-shadow:0 2px 5px rgba(0,0,0,.1);
+    }
+    .grid {
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      gap:15px;
+      padding:20px;
+    }
+    .title {
+      background:#7cb342; color:white;
+      text-align:center; padding:5px;
+      border-radius:4px; font-weight:bold;
+      margin-bottom:8px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div>Automatic Production Counter</div>
+  <button onclick="openLogin()">Login</button>
+</header>
+
+<div id="home" style="padding:20px;">
+  <h2>Welcome</h2>
+  <p>Production monitoring system</p>
+</div>
+
+<div id="login" class="hidden" style="padding:20px;">
+  <h3>Admin Login</h3>
+  <input type="password" id="pwd">
+  <br><br>
+  <button onclick="login()">Login</button>
+  <p id="err" style="color:red;"></p>
+</div>
+
+<div id="dashboard" class="hidden">
+  <div class="grid">
+    <div class="card">
+      <div class="title">CNC 01</div>
+      Target: 200<br>
+      Actual: <span id="cnc1">0</span>
+    </div>
+    <div class="card">
+      <div class="title">CNC 02</div>
+      Target: 200<br>
+      Actual: <span id="cnc2">0</span>
+    </div>
+    <div class="card">
+      <div class="title">CG 01</div>
+      Target: 360<br>
+      Actual: <span id="cg1">0</span>
+    </div>
+  </div>
+</div>
+
+<script>
+function openLogin() {
+  home.style.display = "none";
+  loginDiv.style.display = "block";
+}
+
+function login() {
+  if (pwd.value === "123") {
+    loginDiv.style.display = "none";
+    dashboard.style.display = "block";
+  } else {
+    err.innerText = "Wrong password";
+  }
+}
+
+const home = document.getElementById("home");
+const loginDiv = document.getElementById("login");
+const dashboard = document.getElementById("dashboard");
+const pwd = document.getElementById("pwd");
+const err = document.getElementById("err");
+</script>
+
+</body>
+</html>
