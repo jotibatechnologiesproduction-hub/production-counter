@@ -1,29 +1,14 @@
 <script>
-function showNotification() {
-    if (Notification.permission === "granted") {
-
-        const notification = new Notification("Production Reminder", {
-            body: "Please fill your readings.",
-        });
-
-        notification.onclick = function () {
-            window.location.href = "https://drive.google.com/drive/my-drive";
-        };
-    }
-}
-
 function checkTime() {
     var now = new Date();
     var hours = now.getHours();
     var minutes = now.getMinutes();
 
     if (minutes === 0 && hours % 2 === 0) {
-        showNotification();
+        alert("Please fill your readings on Google Drive");
+        window.location.href = "https://drive.google.com/drive/my-drive";
     }
 }
 
-if ("Notification" in window) {
-    Notification.requestPermission();
-    setInterval(checkTime, 60000);
-}
+setInterval(checkTime, 60000);
 </script>
