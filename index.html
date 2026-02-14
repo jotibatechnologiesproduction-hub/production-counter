@@ -1,10 +1,15 @@
 <script>
 function showNotification() {
     if (Notification.permission === "granted") {
-        new Notification("Production Reminder", {
-            body: "Please fill your readings on https://drive.google.com/drive/my-drive",
+
+        var notification = new Notification("Production Reminder", {
+            body: "Please fill your readings.",
             icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
         });
+
+        notification.onclick = function () {
+            window.open("https://drive.google.com/drive/my-drive", "_blank");
+        };
     }
 }
 
