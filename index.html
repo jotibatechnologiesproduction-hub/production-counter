@@ -1,69 +1,26 @@
-<div id="dashboard" class="hidden" style="padding:20px;">
+<script>
+function showNotification() {
+    if (Notification.permission === "granted") {
+        new Notification("Production Reminder", {
+            body: "Please fill your readings on https://drive.google.com/drive/my-drive",
+            icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
+        });
+    }
+}
 
-  <h2>Production Dashboard – Live Shift</h2>
+function checkTime() {
+    var now = new Date();
+    var hours = now.getHours();
+    var minutes = now.getMinutes();
 
-  <h3>CNC Machines</h3>
-  <div class="grid">
+    if (minutes == 0 && hours % 2 == 0) {
+        showNotification();
+    }
+}
 
-    <div class="card">
-      <div class="title">CNC 01</div>
-      Target (PPH): 200<br>
-      Actual: <span id="cnc1">0</span>
-    </div>
+if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+}
 
-    <div class="card">
-      <div class="title">CNC 02</div>
-      Target (PPH): 200<br>
-      Actual: <span id="cnc2">0</span>
-    </div>
-
-    <div class="card">
-      <div class="title">CNC 03</div>
-      Target (PPH): 250<br>
-      Actual: <span id="cnc3">0</span>
-    </div>
-
-    <div class="card">
-      <div class="title">CNC 04</div>
-      Target (PPH): 200<br>
-      Actual: <span id="cnc4">0</span>
-    </div>
-
-    <div class="card">
-      <div class="title">CNC 05</div>
-      Target (PPH): 200<br>
-      Actual: <span id="cnc5">0</span>
-    </div>
-
-  </div>
-
-  <h3 style="margin-top:30px;">Centerless Grinding (CG)</h3>
-  <div class="grid">
-
-    <div class="card">
-      <div class="title">CG 01</div>
-      Target (PPH): 360<br>
-      Actual: <span id="cg1">0</span>
-    </div>
-
-    <div class="card">
-      <div class="title">CG 02</div>
-      Target (PPH): 360<br>
-      Actual: <span id="cg2">0</span>
-    </div>
-
-    <div class="card">
-      <div class="title">CG 03</div>
-      Target (PPH): 360<br>
-      Actual: <span id="cg3">0</span>
-    </div>
-
-    <div class="card">
-      <div class="title">CG 04</div>
-      Target (PPH): 360<br>
-      Actual: <span id="cg4">0</span>
-    </div>
-
-  </div>
-
-</div>
+setInterval(checkTime, 60000);
+</script>
