@@ -3,7 +3,7 @@ function showNotification() {
     if (Notification.permission === "granted") {
 
         const notification = new Notification("Production Reminder", {
-            body: "TEST: Please fill your readings.",
+            body: "Please fill your readings.",
         });
 
         notification.onclick = function () {
@@ -12,11 +12,21 @@ function showNotification() {
     }
 }
 
+function checkTime() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+
+    // Trigger at 0 minutes and every 2 hours
+    if (minutes === 0 && hours % 2 === 0) {
+        showNotification();
+    }
+}
+
 if ("Notification" in window) {
     Notification.requestPermission().then(function(permission) {
         if (permission === "granted") {
-            // Run every 1 minute (60000 milliseconds)
-            setInterval(showNotification, 60000);
+            setInterval(checkTime, 60000); // Check every 1 minute
         }
     });
 }
