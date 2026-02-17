@@ -1,31 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Production Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 24px;
+    }
+
+    .label {
+      font-size: 16px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Production Dashboard</h1>
+
+<div class="container">
+  <div class="card"><div class="label">CNC1</div><div id="cnc1">0</div></div>
+  <div class="card"><div class="label">CNC2</div><div id="cnc2">0</div></div>
+  <div class="card"><div class="label">CNC3</div><div id="cnc3">0</div></div>
+  <div class="card"><div class="label">CNC4</div><div id="cnc4">0</div></div>
+  <div class="card"><div class="label">CNC5</div><div id="cnc5">0</div></div>
+
+  <div class="card"><div class="label">CG1</div><div id="cg1">0</div></div>
+  <div class="card"><div class="label">CG2</div><div id="cg2">0</div></div>
+  <div class="card"><div class="label">CG3</div><div id="cg3">0</div></div>
+  <div class="card"><div class="label">CG4</div><div id="cg4">0</div></div>
+</div>
+
 <script>
 
 const apiURL = "https://script.google.com/macros/s/AKfycbx6m4-eylFx7SCIeWZtCgQKvdnkhupY8fpOYSUtr6lKgp5-5wns_xbSRdWaTM-oRSY/exec";
 
-async function fetchData() {
-  try {
-    const response = await fetch(apiURL);
-    const data = await response.json();
+function fetchData() {
+  fetch(apiURL)
+    .then(response => response.json())
+    .then(data => {
 
-    document.getElementById("cnc1").innerText = data.CNC1;
-    document.getElementById("cnc2").innerText = data.CNC2;
-    document.getElementById("cnc3").innerText = data.CNC3;
-    document.getElementById("cnc4").innerText = data.CNC4;
-    document.getElementById("cnc5").innerText = data.CNC5;
+      if (!data) return;
 
-    document.getElementById("cg1").innerText = data.CG1;
-    document.getElementById("cg2").innerText = data.CG2;
-    document.getElementById("cg3").innerText = data.CG3;
-    document.getElementById("cg4").innerText = data.CG4;
+      document.getElementById("cnc1").innerText = data.CNC1 || 0;
+      document.getElementById("cnc2").innerText = data.CNC2 || 0;
+      document.getElementById("cnc3").innerText = data.CNC3 || 0;
+      document.getElementById("cnc4").innerText = data.CNC4 || 0;
+      document.getElementById("cnc5").innerText = data.CNC5 || 0;
 
-  } catch (error) {
-    console.log("Data fetch error");
-  }
+      document.getElementById("cg1").innerText = data.CG1 || 0;
+      document.getElementById("cg2").innerText = data.CG2 || 0;
+      document.getElementById("cg3").innerText = data.CG3 || 0;
+      document.getElementById("cg4").innerText = data.CG4 || 0;
+
+    })
+    .catch(error => {
+      console.log("Fetch error:", error);
+    });
 }
 
-// Auto refresh every 5 seconds
+// Load immediately
+fetchData();
+
+// Refresh every 5 seconds
 setInterval(fetchData, 5000);
 
 </script>
 
-
+</body>
+</html>
