@@ -1,33 +1,29 @@
 <script>
-function showNotification() {
-    if (Notification.permission === "granted") {
 
-        const notification = new Notification("Production Reminder", {
-            body: "Please fill your readings.",
-        });
+const apiURL = "https://script.google.com/macros/s/AKfycbx6m4-eylFx7SCIeWZtCgQKvdnkhupY8fpOYSUtr6lKgp5-5wns_xbSRdWaTM-oRSY/exec";
 
-        notification.onclick = function () {
-            window.location.href = "https://drive.google.com/drive/my-drive";
-        };
-    }
+async function fetchData() {
+  try {
+    const response = await fetch(apiURL);
+    const data = await response.json();
+
+    document.getElementById("cnc1").innerText = data.CNC1;
+    document.getElementById("cnc2").innerText = data.CNC2;
+    document.getElementById("cnc3").innerText = data.CNC3;
+    document.getElementById("cnc4").innerText = data.CNC4;
+    document.getElementById("cnc5").innerText = data.CNC5;
+
+    document.getElementById("cg1").innerText = data.CG1;
+    document.getElementById("cg2").innerText = data.CG2;
+    document.getElementById("cg3").innerText = data.CG3;
+    document.getElementById("cg4").innerText = data.CG4;
+
+  } catch (error) {
+    console.log("Data fetch error");
+  }
 }
 
-function checkTime() {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
+// Auto refresh every 5 seconds
+setInterval(fetchData, 5000);
 
-    // Trigger at 0 minutes and every 2 hours
-    if (minutes === 0 && hours % 2 === 0) {
-        showNotification();
-    }
-}
-
-if ("Notification" in window) {
-    Notification.requestPermission().then(function(permission) {
-        if (permission === "granted") {
-            setInterval(checkTime, 60000); // Check every 1 minute
-        }
-    });
-}
 </script>
