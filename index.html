@@ -8,14 +8,12 @@
 
   <style>
     body { font-family: Arial; background:#eee; text-align:center; }
-    h1 { background:#0b5394; color:white; padding:10px; }
-
     .topbar {
-      display:flex;
-      justify-content:space-between;
-      padding:10px;
       background:#0b5394;
       color:white;
+      padding:10px;
+      display:flex;
+      justify-content:space-between;
     }
 
     button { padding:5px 10px; }
@@ -34,7 +32,11 @@
       cursor:pointer;
     }
 
-    .title { background:#6aa84f; padding:5px; font-weight:bold; }
+    .title {
+      background:#6aa84f;
+      padding:5px;
+      font-weight:bold;
+    }
 
     #panel {
       background:white;
@@ -43,10 +45,7 @@
       display:none;
     }
 
-    input {
-      width:80px;
-      margin:5px;
-    }
+    input { width:80px; margin:5px; }
   </style>
 </head>
 
@@ -87,9 +86,12 @@
 
 <script>
 
+const apiURL = "https://script.google.com/macros/s/AKfycbw5au7GFDGARFXxl6-RVLMHpHX-9VmVFFKDa0FSig4IXt9u_f4h8rqaDY9Kv8iQfss/exec";
+
 let isAdmin = false;
 let currentMachine = "";
 let chart;
+let cloudData = {};
 
 const slots = ["7-9","9-11","11-1","1-3","3-5","5-7"];
 
@@ -104,18 +106,35 @@ function login() {
   }
 }
 
-// LOAD TOTALS
-function loadTotals() {
-  let machines = ["CNC1","CNC2","CNC3","CNC4","CNC5","CG1","CG2","CG3","CG4"];
+// FETCH DATA FROM GOOGLE SHEET
+function fetchData() {
 
-  machines.forEach(m => {
-    let raw = JSON.parse(localStorage.getItem(m)) || [];
-    let total = calculateProduction(raw);
-    document.getElementById(m).innerText = total;
-  });
+  fetch(apiURL)
+    .then(res => res.json())
+    .then(data => {
+
+      cloudData = data;
+
+      for (let machine in data) {
+
+        let raw = data[machine];
+
+        let start = raw.find(v => v != 0) || 0;
+        let last = raw[raw.length - 1] || start;
+
+        let total = last - start;
+
+        if (document.getElementById(machine)) {
+          document.getElementById(machine).innerText = total;
+        }
+      }
+    })
+    .catch(err => console.log("Error fetching data"));
 }
 
-loadTotals();
+// AUTO REFRESH
+setInterval(fetchData, 5000);
+fetchData();
 
 // OPEN MACHINE
 function openMachine(machine) {
@@ -124,16 +143,17 @@ function openMachine(machine) {
   document.getElementById("panel").style.display = "block";
   document.getElementById("machineTitle").innerText = machine;
 
-  let saved = JSON.parse(localStorage.getItem(machine)) || Array(6).fill("");
+  let saved = cloudData[machine] || Array(6).fill("");
 
-  // ADMIN INPUTS
   if (isAdmin) {
+
     document.getElementById("adminInputs").style.display = "block";
 
     let html = "";
     for (let i = 0; i < 6; i++) {
       html += `${slots[i]} : <input type="number" id="h${i}" value="${saved[i] || ""}"><br>`;
     }
+
     document.getElementById("inputs").innerHTML = html;
 
   } else {
@@ -143,35 +163,25 @@ function openMachine(machine) {
   drawChart(saved);
 }
 
-// SAVE DATA
+// SAVE TO GOOGLE SHEET
 function saveData() {
 
   let raw = [];
 
   for (let i = 0; i < 6; i++) {
-    raw.push(parseInt(document.getElementById("h"+i).value) || 0);
+    raw.push(document.getElementById("h"+i).value || 0);
   }
 
-  localStorage.setItem(currentMachine, JSON.stringify(raw));
+  let url = apiURL + "?machine=" + currentMachine + "&values=" + raw.join(",");
 
-  loadTotals();
-  drawChart(raw);
+  fetch(url)
+    .then(() => {
+      alert("Saved Successfully");
+      fetchData();
+    });
 }
 
-// PRODUCTION CALCULATION
-function calculateProduction(raw) {
-
-  if (raw.length === 0) return 0;
-
-  let start = raw.find(v => v !== 0);
-  if (!start) return 0;
-
-  let last = raw[raw.length - 1] || start;
-
-  return last - start;
-}
-
-// CHART
+// DRAW CHART
 function drawChart(raw) {
 
   let production = [];
