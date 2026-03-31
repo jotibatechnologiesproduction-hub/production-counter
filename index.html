@@ -8,7 +8,17 @@
 
   <style>
     body { font-family: Arial; background:#eee; text-align:center; }
-    h1 { background:green; color:white; padding:10px; }
+    h1 { background:#0b5394; color:white; padding:10px; }
+
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      padding:10px;
+      background:#0b5394;
+      color:white;
+    }
+
+    button { padding:5px 10px; }
 
     .grid {
       display:grid;
@@ -26,60 +36,81 @@
 
     .title { background:#6aa84f; padding:5px; font-weight:bold; }
 
-    #panel { background:white; padding:20px; margin:20px; display:none; }
+    #panel {
+      background:white;
+      padding:20px;
+      margin:20px;
+      display:none;
+    }
+
+    input {
+      width:80px;
+      margin:5px;
+    }
   </style>
 </head>
 
 <body>
 
-<h1>Production Dashboard</h1>
+<div class="topbar">
+  <h2>Production Dashboard</h2>
+  <button onclick="login()">Admin Login</button>
+</div>
 
 <div class="grid">
+
   <div class="card" onclick="openMachine('CNC1')"><div class="title">CNC 01</div><div id="CNC1">0</div></div>
   <div class="card" onclick="openMachine('CNC2')"><div class="title">CNC 02</div><div id="CNC2">0</div></div>
   <div class="card" onclick="openMachine('CNC3')"><div class="title">CNC 03</div><div id="CNC3">0</div></div>
   <div class="card" onclick="openMachine('CNC4')"><div class="title">CNC 04</div><div id="CNC4">0</div></div>
   <div class="card" onclick="openMachine('CNC5')"><div class="title">CNC 05</div><div id="CNC5">0</div></div>
+
   <div class="card" onclick="openMachine('CG1')"><div class="title">CG 01</div><div id="CG1">0</div></div>
   <div class="card" onclick="openMachine('CG2')"><div class="title">CG 02</div><div id="CG2">0</div></div>
   <div class="card" onclick="openMachine('CG3')"><div class="title">CG 03</div><div id="CG3">0</div></div>
   <div class="card" onclick="openMachine('CG4')"><div class="title">CG 04</div><div id="CG4">0</div></div>
+
 </div>
 
 <div id="panel">
   <h2 id="machineTitle"></h2>
 
-  <p>Enter cumulative reading (every 2 hours):</p>
+  <div id="adminInputs" style="display:none;">
+    <p>Enter cumulative readings (every 2 hrs):</p>
+    <div id="inputs"></div>
+    <button onclick="saveData()">Save</button>
+  </div>
 
-  <div id="inputs"></div>
-
-  <button onclick="saveData()">Save</button>
-
-  <h3>2-Hour Production</h3>
+  <h3>Production Chart</h3>
   <canvas id="chart"></canvas>
 </div>
 
 <script>
 
+let isAdmin = false;
 let currentMachine = "";
 let chart;
 
-// SHIFT DETECTION
-function getShift() {
-  let hour = new Date().getHours();
-  return (hour >= 7 && hour < 19) ? "DAY" : "NIGHT";
-}
-
-// TIME SLOTS (2-HR)
 const slots = ["7-9","9-11","11-1","1-3","3-5","5-7"];
+
+// LOGIN
+function login() {
+  let pass = prompt("Enter Password:");
+  if (pass === "12345") {
+    isAdmin = true;
+    alert("Admin Mode ON");
+  } else {
+    alert("Wrong Password");
+  }
+}
 
 // LOAD TOTALS
 function loadTotals() {
   let machines = ["CNC1","CNC2","CNC3","CNC4","CNC5","CG1","CG2","CG3","CG4"];
 
   machines.forEach(m => {
-    let data = JSON.parse(localStorage.getItem(m)) || Array(6).fill(0);
-    let total = data.reduce((a,b)=>a+b,0);
+    let raw = JSON.parse(localStorage.getItem(m)) || [];
+    let total = calculateProduction(raw);
     document.getElementById(m).innerText = total;
   });
 }
@@ -91,19 +122,25 @@ function openMachine(machine) {
 
   currentMachine = machine;
   document.getElementById("panel").style.display = "block";
-  document.getElementById("machineTitle").innerText = machine + " (" + getShift() + " SHIFT)";
+  document.getElementById("machineTitle").innerText = machine;
 
-  let saved = JSON.parse(localStorage.getItem(machine+"_raw")) || Array(6).fill(0);
+  let saved = JSON.parse(localStorage.getItem(machine)) || Array(6).fill("");
 
-  let html = "";
+  // ADMIN INPUTS
+  if (isAdmin) {
+    document.getElementById("adminInputs").style.display = "block";
 
-  for (let i = 0; i < 6; i++) {
-    html += `${slots[i]} : <input type="number" id="h${i}" value="${saved[i]}"><br>`;
+    let html = "";
+    for (let i = 0; i < 6; i++) {
+      html += `${slots[i]} : <input type="number" id="h${i}" value="${saved[i] || ""}"><br>`;
+    }
+    document.getElementById("inputs").innerHTML = html;
+
+  } else {
+    document.getElementById("adminInputs").style.display = "none";
   }
 
-  document.getElementById("inputs").innerHTML = html;
-
-  calculateAndDraw(saved);
+  drawChart(saved);
 }
 
 // SAVE DATA
@@ -115,29 +152,34 @@ function saveData() {
     raw.push(parseInt(document.getElementById("h"+i).value) || 0);
   }
 
-  localStorage.setItem(currentMachine+"_raw", JSON.stringify(raw));
+  localStorage.setItem(currentMachine, JSON.stringify(raw));
 
-  calculateAndDraw(raw);
+  loadTotals();
+  drawChart(raw);
 }
 
-// CALCULATE DIFFERENCE (2-HOUR)
-function calculateAndDraw(raw) {
+// PRODUCTION CALCULATION
+function calculateProduction(raw) {
+
+  if (raw.length === 0) return 0;
+
+  let start = raw.find(v => v !== 0);
+  if (!start) return 0;
+
+  let last = raw[raw.length - 1] || start;
+
+  return last - start;
+}
+
+// CHART
+function drawChart(raw) {
 
   let production = [];
 
   for (let i = 0; i < raw.length; i++) {
-    if (i == 0) production.push(raw[i]);
-    else production.push(raw[i] - raw[i-1]);
+    if (i == 0) production.push(0);
+    else production.push((raw[i] || 0) - (raw[i-1] || 0));
   }
-
-  let total = production.reduce((a,b)=>a+b,0);
-  document.getElementById(currentMachine).innerText = total;
-
-  drawChart(production);
-}
-
-// DRAW CHART
-function drawChart(data) {
 
   if (chart) chart.destroy();
 
@@ -147,38 +189,11 @@ function drawChart(data) {
       labels: slots,
       datasets: [{
         label: "2Hr Production",
-        data: data
+        data: production
       }]
     }
   });
 }
-
-// AUTO SHIFT SAVE AT 8 AM
-function autoSaveShift() {
-
-  let now = new Date();
-  if (now.getHours() == 8 && now.getMinutes() == 0) {
-
-    let date = now.toISOString().split('T')[0];
-    let shift = getShift();
-
-    let machines = ["CNC1","CNC2","CNC3","CNC4","CNC5","CG1","CG2","CG3","CG4"];
-
-    let report = {};
-
-    machines.forEach(m => {
-      report[m] = JSON.parse(localStorage.getItem(m+"_raw")) || [];
-      localStorage.removeItem(m+"_raw"); // reset
-    });
-
-    localStorage.setItem(date+"_"+shift, JSON.stringify(report));
-
-    alert("Shift Data Saved: " + date + "_" + shift);
-  }
-}
-
-// CHECK EVERY MINUTE
-setInterval(autoSaveShift, 60000);
 
 </script>
 
