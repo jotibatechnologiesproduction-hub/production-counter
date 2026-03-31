@@ -4,56 +4,29 @@
   <title>Production Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    body {
-      font-family: Arial;
-      background: #eee;
-      text-align: center;
-    }
-
-    h1 {
-      background: green;
-      color: white;
-      padding: 10px;
-    }
+    body { font-family: Arial; background:#eee; text-align:center; }
+    h1 { background:green; color:white; padding:10px; }
 
     .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      padding: 20px;
+      display:grid;
+      grid-template-columns: repeat(3,1fr);
+      gap:15px;
+      padding:20px;
     }
 
     .card {
-      background: white;
-      border: 2px solid black;
-      padding: 10px;
-      cursor: pointer;
+      background:white;
+      border:2px solid black;
+      padding:10px;
+      cursor:pointer;
     }
 
-    .title {
-      background: #6aa84f;
-      padding: 5px;
-      font-weight: bold;
-    }
+    .title { background:#6aa84f; padding:5px; font-weight:bold; }
 
-    .data {
-      text-align: left;
-      padding: 5px;
-    }
-
-    #chartSection {
-      margin: 20px;
-      background: white;
-      padding: 20px;
-    }
-
-    input {
-      width: 40px;
-    }
+    #panel { background:white; padding:20px; margin:20px; display:none; }
   </style>
 </head>
 
@@ -62,32 +35,27 @@
 <h1>Production Dashboard</h1>
 
 <div class="grid">
-
-  <div class="card" onclick="openMachine('CNC1')"><div class="title">CNC 01</div><div class="data">Actual: <span id="CNC1">0</span></div></div>
-  <div class="card" onclick="openMachine('CNC2')"><div class="title">CNC 02</div><div class="data">Actual: <span id="CNC2">0</span></div></div>
-  <div class="card" onclick="openMachine('CNC3')"><div class="title">CNC 03</div><div class="data">Actual: <span id="CNC3">0</span></div></div>
-
-  <div class="card" onclick="openMachine('CNC4')"><div class="title">CNC 04</div><div class="data">Actual: <span id="CNC4">0</span></div></div>
-  <div class="card" onclick="openMachine('CNC5')"><div class="title">CNC 05</div><div class="data">Actual: <span id="CNC5">0</span></div></div>
-  <div class="card" onclick="openMachine('CG1')"><div class="title">CG 01</div><div class="data">Actual: <span id="CG1">0</span></div></div>
-
-  <div class="card" onclick="openMachine('CG2')"><div class="title">CG 02</div><div class="data">Actual: <span id="CG2">0</span></div></div>
-  <div class="card" onclick="openMachine('CG3')"><div class="title">CG 03</div><div class="data">Actual: <span id="CG3">0</span></div></div>
-  <div class="card" onclick="openMachine('CG4')"><div class="title">CG 04</div><div class="data">Actual: <span id="CG4">0</span></div></div>
-
+  <div class="card" onclick="openMachine('CNC1')"><div class="title">CNC 01</div><div id="CNC1">0</div></div>
+  <div class="card" onclick="openMachine('CNC2')"><div class="title">CNC 02</div><div id="CNC2">0</div></div>
+  <div class="card" onclick="openMachine('CNC3')"><div class="title">CNC 03</div><div id="CNC3">0</div></div>
+  <div class="card" onclick="openMachine('CNC4')"><div class="title">CNC 04</div><div id="CNC4">0</div></div>
+  <div class="card" onclick="openMachine('CNC5')"><div class="title">CNC 05</div><div id="CNC5">0</div></div>
+  <div class="card" onclick="openMachine('CG1')"><div class="title">CG 01</div><div id="CG1">0</div></div>
+  <div class="card" onclick="openMachine('CG2')"><div class="title">CG 02</div><div id="CG2">0</div></div>
+  <div class="card" onclick="openMachine('CG3')"><div class="title">CG 03</div><div id="CG3">0</div></div>
+  <div class="card" onclick="openMachine('CG4')"><div class="title">CG 04</div><div id="CG4">0</div></div>
 </div>
 
-<!-- Chart Section -->
-<div id="chartSection" style="display:none;">
+<div id="panel">
   <h2 id="machineTitle"></h2>
 
-  <p>Enter Hourly Production (12 hrs):</p>
+  <p>Enter cumulative reading (every 2 hours):</p>
 
   <div id="inputs"></div>
 
-  <br>
   <button onclick="saveData()">Save</button>
 
+  <h3>2-Hour Production</h3>
   <canvas id="chart"></canvas>
 </div>
 
@@ -96,12 +64,21 @@
 let currentMachine = "";
 let chart;
 
-// Load saved data
+// SHIFT DETECTION
+function getShift() {
+  let hour = new Date().getHours();
+  return (hour >= 7 && hour < 19) ? "DAY" : "NIGHT";
+}
+
+// TIME SLOTS (2-HR)
+const slots = ["7-9","9-11","11-1","1-3","3-5","5-7"];
+
+// LOAD TOTALS
 function loadTotals() {
   let machines = ["CNC1","CNC2","CNC3","CNC4","CNC5","CG1","CG2","CG3","CG4"];
 
   machines.forEach(m => {
-    let data = JSON.parse(localStorage.getItem(m)) || Array(12).fill(0);
+    let data = JSON.parse(localStorage.getItem(m)) || Array(6).fill(0);
     let total = data.reduce((a,b)=>a+b,0);
     document.getElementById(m).innerText = total;
   });
@@ -109,58 +86,99 @@ function loadTotals() {
 
 loadTotals();
 
+// OPEN MACHINE
 function openMachine(machine) {
 
   currentMachine = machine;
-  document.getElementById("chartSection").style.display = "block";
-  document.getElementById("machineTitle").innerText = machine + " - 12 Hr Production";
+  document.getElementById("panel").style.display = "block";
+  document.getElementById("machineTitle").innerText = machine + " (" + getShift() + " SHIFT)";
 
-  let saved = JSON.parse(localStorage.getItem(machine)) || Array(12).fill(0);
+  let saved = JSON.parse(localStorage.getItem(machine+"_raw")) || Array(6).fill(0);
 
   let html = "";
 
-  for (let i = 0; i < 12; i++) {
-    html += `H${i+1}: <input type="number" id="h${i}" value="${saved[i]}"> `;
+  for (let i = 0; i < 6; i++) {
+    html += `${slots[i]} : <input type="number" id="h${i}" value="${saved[i]}"><br>`;
   }
 
   document.getElementById("inputs").innerHTML = html;
 
-  drawChart(saved);
+  calculateAndDraw(saved);
 }
 
+// SAVE DATA
 function saveData() {
 
-  let data = [];
+  let raw = [];
 
-  for (let i = 0; i < 12; i++) {
-    data.push(parseInt(document.getElementById("h"+i).value) || 0);
+  for (let i = 0; i < 6; i++) {
+    raw.push(parseInt(document.getElementById("h"+i).value) || 0);
   }
 
-  localStorage.setItem(currentMachine, JSON.stringify(data));
+  localStorage.setItem(currentMachine+"_raw", JSON.stringify(raw));
 
-  let total = data.reduce((a,b)=>a+b,0);
-  document.getElementById(currentMachine).innerText = total;
-
-  drawChart(data);
+  calculateAndDraw(raw);
 }
 
-function drawChart(data) {
+// CALCULATE DIFFERENCE (2-HOUR)
+function calculateAndDraw(raw) {
 
-  let labels = ["1","2","3","4","5","6","7","8","9","10","11","12"];
+  let production = [];
+
+  for (let i = 0; i < raw.length; i++) {
+    if (i == 0) production.push(raw[i]);
+    else production.push(raw[i] - raw[i-1]);
+  }
+
+  let total = production.reduce((a,b)=>a+b,0);
+  document.getElementById(currentMachine).innerText = total;
+
+  drawChart(production);
+}
+
+// DRAW CHART
+function drawChart(data) {
 
   if (chart) chart.destroy();
 
   chart = new Chart(document.getElementById("chart"), {
     type: 'bar',
     data: {
-      labels: labels,
+      labels: slots,
       datasets: [{
-        label: "Production",
+        label: "2Hr Production",
         data: data
       }]
     }
   });
 }
+
+// AUTO SHIFT SAVE AT 8 AM
+function autoSaveShift() {
+
+  let now = new Date();
+  if (now.getHours() == 8 && now.getMinutes() == 0) {
+
+    let date = now.toISOString().split('T')[0];
+    let shift = getShift();
+
+    let machines = ["CNC1","CNC2","CNC3","CNC4","CNC5","CG1","CG2","CG3","CG4"];
+
+    let report = {};
+
+    machines.forEach(m => {
+      report[m] = JSON.parse(localStorage.getItem(m+"_raw")) || [];
+      localStorage.removeItem(m+"_raw"); // reset
+    });
+
+    localStorage.setItem(date+"_"+shift, JSON.stringify(report));
+
+    alert("Shift Data Saved: " + date + "_" + shift);
+  }
+}
+
+// CHECK EVERY MINUTE
+setInterval(autoSaveShift, 60000);
 
 </script>
 
