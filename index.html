@@ -3,88 +3,164 @@
 <head>
   <title>Production Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #111;
-      color: white;
+      font-family: Arial;
+      background: #eee;
       text-align: center;
     }
 
     h1 {
-      margin-top: 20px;
+      background: green;
+      color: white;
+      padding: 10px;
     }
 
-    .container {
+    .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
       padding: 20px;
     }
 
     .card {
-      background: #222;
-      padding: 20px;
-      border-radius: 10px;
-      font-size: 24px;
+      background: white;
+      border: 2px solid black;
+      padding: 10px;
+      cursor: pointer;
     }
 
-    .label {
-      font-size: 16px;
-      color: #aaa;
+    .title {
+      background: #6aa84f;
+      padding: 5px;
+      font-weight: bold;
+    }
+
+    .data {
+      text-align: left;
+      padding: 5px;
+    }
+
+    #chartSection {
+      margin: 20px;
+      background: white;
+      padding: 20px;
+    }
+
+    input {
+      width: 40px;
     }
   </style>
 </head>
+
 <body>
 
 <h1>Production Dashboard</h1>
 
-<div class="container">
-  <div class="card"><div class="label">CNC1</div><div id="cnc1">0</div></div>
-  <div class="card"><div class="label">CNC2</div><div id="cnc2">0</div></div>
-  <div class="card"><div class="label">CNC3</div><div id="cnc3">0</div></div>
-  <div class="card"><div class="label">CNC4</div><div id="cnc4">0</div></div>
-  <div class="card"><div class="label">CNC5</div><div id="cnc5">0</div></div>
+<div class="grid">
 
-  <div class="card"><div class="label">CG1</div><div id="cg1">0</div></div>
-  <div class="card"><div class="label">CG2</div><div id="cg2">0</div></div>
-  <div class="card"><div class="label">CG3</div><div id="cg3">0</div></div>
-  <div class="card"><div class="label">CG4</div><div id="cg4">0</div></div>
+  <div class="card" onclick="openMachine('CNC1')"><div class="title">CNC 01</div><div class="data">Actual: <span id="CNC1">0</span></div></div>
+  <div class="card" onclick="openMachine('CNC2')"><div class="title">CNC 02</div><div class="data">Actual: <span id="CNC2">0</span></div></div>
+  <div class="card" onclick="openMachine('CNC3')"><div class="title">CNC 03</div><div class="data">Actual: <span id="CNC3">0</span></div></div>
+
+  <div class="card" onclick="openMachine('CNC4')"><div class="title">CNC 04</div><div class="data">Actual: <span id="CNC4">0</span></div></div>
+  <div class="card" onclick="openMachine('CNC5')"><div class="title">CNC 05</div><div class="data">Actual: <span id="CNC5">0</span></div></div>
+  <div class="card" onclick="openMachine('CG1')"><div class="title">CG 01</div><div class="data">Actual: <span id="CG1">0</span></div></div>
+
+  <div class="card" onclick="openMachine('CG2')"><div class="title">CG 02</div><div class="data">Actual: <span id="CG2">0</span></div></div>
+  <div class="card" onclick="openMachine('CG3')"><div class="title">CG 03</div><div class="data">Actual: <span id="CG3">0</span></div></div>
+  <div class="card" onclick="openMachine('CG4')"><div class="title">CG 04</div><div class="data">Actual: <span id="CG4">0</span></div></div>
+
+</div>
+
+<!-- Chart Section -->
+<div id="chartSection" style="display:none;">
+  <h2 id="machineTitle"></h2>
+
+  <p>Enter Hourly Production (12 hrs):</p>
+
+  <div id="inputs"></div>
+
+  <br>
+  <button onclick="saveData()">Save</button>
+
+  <canvas id="chart"></canvas>
 </div>
 
 <script>
 
-const apiURL = "https://script.google.com/macros/s/AKfycbx6m4-eylFx7SCIeWZtCgQKvdnkhupY8fpOYSUtr6lKgp5-5wns_xbSRdWaTM-oRSY/exec";
+let currentMachine = "";
+let chart;
 
-function fetchData() {
-  fetch(apiURL)
-    .then(response => response.json())
-    .then(data => {
+// Load saved data
+function loadTotals() {
+  let machines = ["CNC1","CNC2","CNC3","CNC4","CNC5","CG1","CG2","CG3","CG4"];
 
-      if (!data) return;
-
-      document.getElementById("cnc1").innerText = data.CNC1 || 0;
-      document.getElementById("cnc2").innerText = data.CNC2 || 0;
-      document.getElementById("cnc3").innerText = data.CNC3 || 0;
-      document.getElementById("cnc4").innerText = data.CNC4 || 0;
-      document.getElementById("cnc5").innerText = data.CNC5 || 0;
-
-      document.getElementById("cg1").innerText = data.CG1 || 0;
-      document.getElementById("cg2").innerText = data.CG2 || 0;
-      document.getElementById("cg3").innerText = data.CG3 || 0;
-      document.getElementById("cg4").innerText = data.CG4 || 0;
-
-    })
-    .catch(error => {
-      console.log("Fetch error:", error);
-    });
+  machines.forEach(m => {
+    let data = JSON.parse(localStorage.getItem(m)) || Array(12).fill(0);
+    let total = data.reduce((a,b)=>a+b,0);
+    document.getElementById(m).innerText = total;
+  });
 }
 
-// Load immediately
-fetchData();
+loadTotals();
 
-// Refresh every 5 seconds
-setInterval(fetchData, 5000);
+function openMachine(machine) {
+
+  currentMachine = machine;
+  document.getElementById("chartSection").style.display = "block";
+  document.getElementById("machineTitle").innerText = machine + " - 12 Hr Production";
+
+  let saved = JSON.parse(localStorage.getItem(machine)) || Array(12).fill(0);
+
+  let html = "";
+
+  for (let i = 0; i < 12; i++) {
+    html += `H${i+1}: <input type="number" id="h${i}" value="${saved[i]}"> `;
+  }
+
+  document.getElementById("inputs").innerHTML = html;
+
+  drawChart(saved);
+}
+
+function saveData() {
+
+  let data = [];
+
+  for (let i = 0; i < 12; i++) {
+    data.push(parseInt(document.getElementById("h"+i).value) || 0);
+  }
+
+  localStorage.setItem(currentMachine, JSON.stringify(data));
+
+  let total = data.reduce((a,b)=>a+b,0);
+  document.getElementById(currentMachine).innerText = total;
+
+  drawChart(data);
+}
+
+function drawChart(data) {
+
+  let labels = ["1","2","3","4","5","6","7","8","9","10","11","12"];
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(document.getElementById("chart"), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Production",
+        data: data
+      }]
+    }
+  });
+}
 
 </script>
 
