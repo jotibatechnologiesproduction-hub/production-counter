@@ -1,60 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Production Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production Dashboard</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <style>
-    body { font-family: Arial; background:#eee; text-align:center; }
+<style>
+body { font-family: Arial; background:#2b3e63; color:white; text-align:center; }
 
-    .topbar {
-      background:#0b5394;
-      color:white;
-      padding:10px;
-      display:flex;
-      justify-content:space-between;
-    }
+.topbar {
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  background:#0b5394;
+}
 
-    button { padding:6px 12px; margin:5px; }
+button {
+  padding:8px 12px;
+  margin:5px;
+  cursor:pointer;
+}
 
-    .grid {
-      display:grid;
-      grid-template-columns: repeat(3,1fr);
-      gap:15px;
-      padding:20px;
-    }
+.grid {
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap:15px;
+  padding:20px;
+}
 
-    .card {
-      background:white;
-      border:2px solid black;
-      padding:10px;
-      cursor:pointer;
-    }
+.card {
+  background:white;
+  color:black;
+  padding:10px;
+  border-radius:5px;
+}
 
-    .title {
-      background:#6aa84f;
-      padding:5px;
-      font-weight:bold;
-    }
+.title {
+  background:#6aa84f;
+  padding:5px;
+  font-weight:bold;
+}
 
-    #panel {
-      background:white;
-      padding:20px;
-      margin:20px;
-      display:none;
-    }
+#panel, #notesPanel {
+  background:white;
+  color:black;
+  padding:20px;
+  margin:20px;
+  display:none;
+}
 
-    input { width:80px; margin:5px; }
-  </style>
+textarea { width:300px; }
+
+</style>
 </head>
 
 <body>
 
 <div class="topbar">
   <h2>Production Dashboard</h2>
-  <button onclick="login()">Admin Login</button>
+  <div>
+    <button onclick="login()">Login</button>
+    <button onclick="openNotes()">Admin Notes</button>
+  </div>
 </div>
 
 <div class="grid">
@@ -70,179 +78,175 @@
   <div class="card" onclick="openMachine('CG4')"><div class="title">CG 04</div><div id="CG4">0</div></div>
 </div>
 
+<!-- MACHINE PANEL -->
 <div id="panel">
   <h2 id="machineTitle"></h2>
 
-  <!-- OCR -->
   <input type="file" id="imageInput">
   <button onclick="readImage()">Read Meter</button>
   <p>Detected: <span id="detected"></span></p>
 
-  <!-- Admin Inputs -->
   <div id="adminInputs" style="display:none;">
     <p>Enter readings:</p>
-
-    7: <input type="number" id="h0"><br>
-    9: <input type="number" id="h1"><br>
-    11: <input type="number" id="h2"><br>
-    13: <input type="number" id="h3"><br>
-    15: <input type="number" id="h4"><br>
-    17: <input type="number" id="h5"><br>
-    19: <input type="number" id="h6"><br>
-
+    7: <input id="h0"><br>
+    9: <input id="h1"><br>
+    11: <input id="h2"><br>
+    13: <input id="h3"><br>
+    15: <input id="h4"><br>
+    17: <input id="h5"><br>
+    19: <input id="h6"><br>
     <button onclick="saveData()">Save</button>
   </div>
 
-  <h3>2 Hour Production</h3>
   <canvas id="chart"></canvas>
+</div>
+
+<!-- NOTES PANEL -->
+<div id="notesPanel">
+  <h2>Admin Notes</h2>
+
+  <button onclick="openSection('Y.F')">Y.F</button>
+  <button onclick="openSection('G.M')">G.M</button>
+  <button onclick="openSection('V.G')">V.G</button>
+  <button onclick="openSection('G.G')">G.G</button>
+  <button onclick="openSection('K.P')">K.P</button>
+  <button onclick="openSection('R.S')">R.S</button>
+
+  <div id="sectionPage" style="display:none;">
+    <h3 id="sectionTitle"></h3>
+    <textarea id="noteText"></textarea><br>
+    <button onclick="saveNote()">Save</button>
+
+    <div id="notesList"></div>
+  </div>
 </div>
 
 <script>
 
 const apiURL = "https://script.google.com/macros/s/AKfycbw5au7GFDGARFXxl6-RVLMHpHX-9VmVFFKDa0FSig4IXt9u_f4h8rqaDY9Kv8iQfss/exec";
-
-// 🔴 PUT YOUR API KEY HERE
-const visionAPI = "AIzaSyDCjXVnhUJdimSkymnZlk4q92GhaSDYOgY";
+const visionAPI = "YOUR_API_KEY_HERE";
 
 let isAdmin = false;
 let currentMachine = "";
+let currentSection = "";
 let chart;
 let cloudData = {};
 
 // LOGIN
-function login() {
-  let pass = prompt("Enter Password:");
-  if (pass === "12345") {
-    isAdmin = true;
-    alert("Admin Mode ON");
-  } else {
-    alert("Wrong Password");
-  }
+function login(){
+  let pass = prompt("Enter Password");
+  if(pass==="12345"){ isAdmin=true; alert("Admin ON"); }
 }
 
 // FETCH DATA
-function fetchData() {
+function fetchData(){
   fetch(apiURL)
-    .then(res => res.json())
-    .then(data => {
-
-      cloudData = data;
-
-      for (let machine in data) {
-        let raw = data[machine];
-        let total = (raw[6] || 0) - (raw[0] || 0);
-        document.getElementById(machine).innerText = total;
-      }
-    });
+  .then(r=>r.json())
+  .then(data=>{
+    cloudData=data;
+    for(let m in data){
+      document.getElementById(m).innerText=(data[m][6]||0)-(data[m][0]||0);
+    }
+  });
 }
-setInterval(fetchData, 5000);
+setInterval(fetchData,5000);
 fetchData();
 
-// OPEN MACHINE
-function openMachine(machine) {
-  currentMachine = machine;
+// MACHINE
+function openMachine(m){
+  currentMachine=m;
+  document.getElementById("panel").style.display="block";
+  document.getElementById("machineTitle").innerText=m;
 
-  document.getElementById("panel").style.display = "block";
-  document.getElementById("machineTitle").innerText = machine;
+  let d=cloudData[m]||Array(7).fill("");
 
-  let saved = cloudData[machine] || Array(7).fill("");
-
-  if (isAdmin) {
-    document.getElementById("adminInputs").style.display = "block";
-
-    for (let i = 0; i <= 6; i++) {
-      document.getElementById("h"+i).value = saved[i] || "";
-    }
-  } else {
-    document.getElementById("adminInputs").style.display = "none";
+  if(isAdmin){
+    document.getElementById("adminInputs").style.display="block";
+    for(let i=0;i<7;i++) document.getElementById("h"+i).value=d[i];
   }
 
-  drawChart(saved);
+  drawChart(d);
 }
 
-// SAVE DATA
-function saveData() {
-  let raw = [];
+// SAVE
+function saveData(){
+  let v=[];
+  for(let i=0;i<7;i++) v.push(document.getElementById("h"+i).value||0);
+  fetch(apiURL+"?machine="+currentMachine+"&values="+v.join(","));
+}
 
-  for (let i = 0; i <= 6; i++) {
-    raw.push(document.getElementById("h"+i).value || 0);
-  }
+// CHART
+function drawChart(raw){
+  let p=[];
+  for(let i=1;i<raw.length;i++) p.push((raw[i]||0)-(raw[i-1]||0));
 
-  let url = apiURL + "?machine=" + currentMachine + "&values=" + raw.join(",");
+  if(chart) chart.destroy();
 
-  fetch(url).then(() => {
-    alert("Saved");
-    fetchData();
+  chart=new Chart(document.getElementById("chart"),{
+    type:'bar',
+    data:{labels:["9","11","13","15","17","19"],datasets:[{data:p}]}
   });
 }
 
-// DRAW CHART
-function drawChart(raw) {
-  let production = [];
+// OCR
+async function readImage(){
+  let file=document.getElementById("imageInput").files[0];
+  let base64=await toBase64(file);
 
-  for (let i = 1; i < raw.length; i++) {
-    production.push((raw[i] || 0) - (raw[i-1] || 0));
-  }
-
-  if (chart) chart.destroy();
-
-  chart = new Chart(document.getElementById("chart"), {
-    type: 'bar',
-    data: {
-      labels: ["9","11","13","15","17","19"],
-      datasets: [{
-        label: "Production",
-        data: production
+  let res=await fetch("https://vision.googleapis.com/v1/images:annotate?key="+visionAPI,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      requests:[{
+        image:{content:base64.split(",")[1]},
+        features:[{type:"TEXT_DETECTION"}]
       }]
-    }
+    })
+  });
+
+  let data=await res.json();
+  let num=data.responses[0].fullTextAnnotation.text.replace(/\D/g,'');
+
+  document.getElementById("detected").innerText=num;
+  document.getElementById("h1").value=num;
+}
+
+function toBase64(file){
+  return new Promise(r=>{
+    let reader=new FileReader();
+    reader.onload=()=>r(reader.result);
+    reader.readAsDataURL(file);
   });
 }
 
-// 🔥 OCR FUNCTION
-async function readImage() {
-
-  const file = document.getElementById("imageInput").files[0];
-
-  if (!file) {
-    alert("Select image");
-    return;
-  }
-
-  const base64 = await toBase64(file);
-
-  const response = await fetch(
-    "https://vision.googleapis.com/v1/images:annotate?key=" + visionAPI,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        requests: [{
-          image: { content: base64.split(",")[1] },
-          features: [{ type: "TEXT_DETECTION" }]
-        }]
-      })
-    }
-  );
-
-  const data = await response.json();
-
-  let text = data.responses[0].fullTextAnnotation.text;
-
-  let number = text.replace(/\D/g, '');
-
-  document.getElementById("detected").innerText = number;
-
-  // auto fill 9 AM field
-  document.getElementById("h1").value = number;
+// NOTES
+function openNotes(){
+  if(!isAdmin){alert("Admin only");return;}
+  document.getElementById("notesPanel").style.display="block";
 }
 
-// base64 converter
-function toBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
+function openSection(s){
+  currentSection=s;
+  document.getElementById("sectionPage").style.display="block";
+  document.getElementById("sectionTitle").innerText=s;
+  loadNotes();
+}
+
+function saveNote(){
+  let t=document.getElementById("noteText").value;
+  fetch(apiURL+"?section="+currentSection+"&text="+encodeURIComponent(t))
+  .then(()=>{document.getElementById("noteText").value="";loadNotes();});
+}
+
+function loadNotes(){
+  fetch(apiURL+"?getNotes=1")
+  .then(r=>r.json())
+  .then(d=>{
+    let html="";
+    d.filter(n=>n.section===currentSection).reverse().forEach(n=>{
+      html+=`<p><b>${new Date(n.date).toLocaleString()}</b><br>${n.text}</p><hr>`;
+    });
+    document.getElementById("notesList").innerHTML=html;
   });
 }
 
